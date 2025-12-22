@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.irondome.sentinel</string>
+
+  <!-- IMPORTANT: Use a LaunchAgent (user session) because Messages automation requires it. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-dimsu</string>
+    <string>/bin/zsh</string>
+    <string>/Users/mirelacertan/.continue/scripts/irondome-sentinel-launch.zsh</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- Iron Dome pipeline -->
+    <key>IRONDOME_INTERVAL_SECONDS</key>
+    <string>60</string>
+
+    <!-- Ollama -->
+    <key>OLLAMA_URL</key>
+    <string>http://localhost:11434</string>
+    <key>OLLAMA_MODEL</key>
+    <string>llama3.2:8b-instruct-qat</string>
+
+    <!-- Existing responder guardrails -->
+    <key>IRONDOME_MODE</key>
+    <string>notify</string>
+    <key>IRONDOME_NOTIFY</key>
+    <string>1</string>
+    <key>IRONDOME_ACTIONS_ALLOWLIST</key>
+    <string>notify_only</string>
+
+    <!-- Sentinel Messages control (set these to YOUR phone / Apple ID) -->
+    <key>SENTINEL_TO</key>
+    <string>+14133550676</string>
+    <key>SENTINEL_ALLOWED_HANDLES</key>
+    <string>+14133550676</string>
+
+    <!-- Power control + lifecycle messages -->
+    <key>SENTINEL_POWER_DIRECT</key>
+    <string>1</string>
+    <key>SENTINEL_ONLINE_ON_BOOT</key>
+    <string>1</string>
+
+    <key>SENTINEL_SHARED_SECRET</key>
+    <string></string>
+
+    <key>SENTINEL_POLL_SECONDS</key>
+    <string>5</string>
+    <key>SENTINEL_POLL_BACKEND</key>
+    <string>chatdb</string>
+
+    <!-- Throttling (prevents notification spam) -->
+    <key>SENTINEL_ALERT_MIN_INTERVAL_SECONDS</key>
+    <string>900</string>
+    <key>SENTINEL_REPLY_MIN_INTERVAL_SECONDS</key>
+    <string>5</string>
+    <key>SENTINEL_DAILY_SUMMARY</key>
+    <string>0</string>
+
+    <!-- Optional: Legal module (local evidence chain + report drafts). Disabled by default. -->
+    <key>SENTINEL_LEGAL_ENABLE</key>
+    <string>0</string>
+    <key>SENTINEL_LEGAL_MIN_CONFIDENCE</key>
+    <string>0.85</string>
+    <key>SENTINEL_LEGAL_MIN_PERSISTENCE</key>
+    <string>3</string>
+    <key>SENTINEL_LEGAL_MAX_REPORTS_PER_DAY</key>
+    <string>3</string>
+    <key>SENTINEL_LEGAL_WHOIS</key>
+    <string>1</string>
+    <key>SENTINEL_LEGAL_RDAP</key>
+    <string>1</string>
+    <key>SENTINEL_LEGAL_MAX_SNAPSHOT_BYTES</key>
+    <string>200000</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/com.irondome.sentinel.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/com.irondome.sentinel.err.log</string>
+</dict>
+</plist>

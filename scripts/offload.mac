@@ -1,0 +1,16 @@
+# 1) On the sentinel MacBook: clone/copy your .continue folder (same paths assumed)
+#    Ensure Messages.app is signed into iMessage for your Apple ID.
+
+# 2) Start Ollama (Docker example, matches your current setup)
+cd /Users/mirelacertan/.continue
+docker compose up -d --build ollama
+
+# 3) Install + load the LaunchAgent (runs caffeinated daemon loop every 60s)
+cp /Users/mirelacertan/.continue/launchd/com.irondome.buddy.plist ~/Library/LaunchAgents/
+launchctl unload -w ~/Library/LaunchAgents/com.irondome.buddy.plist 2>/dev/null || true
+launchctl load -w ~/Library/LaunchAgents/com.irondome.buddy.plist
+launchctl kickstart -k gui/$(id -u)/com.irondome.buddy
+
+# 4) Where to look
+# - Workdir + artifacts: /tmp/irondome/*
+# - LaunchAgent logs: /tmp/irondome/launchd.out.log /tmp/irondome/launchd.err.log

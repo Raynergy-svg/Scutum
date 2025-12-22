@@ -1,0 +1,127 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: buddy-ollama
+    # Using the published image instead of building locally (no Dockerfile required)
+    volumes:
+      - ./ollama-models:/root/.ollama  # Persistent models
+      - ./data:/root/data  # Custom data/scripts
+      - ./logs:/tmp/logs  # Scan outputs
+      - /dev/shm:/dev/shm  # For larger models if needed
+    ports:
+      - 127.0.0.1:11434:11434  # Ollama API (localhost only)
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*  # Allow CORS for Continue.dev
+      - OLLAMA_DEBUG=true  # For troubleshooting
+      - CUDA_VISIBLE_DEVICES=all  # GPU if available
+      - OLLAMA_MODEL=qwen2.5-coder:7b  # Default model to pull/use on startup
+    # The Ollama image uses the `ollama` binary as its entrypoint.
+    # So the `command:` should be the subcommand (not prefixed with `ollama`).
+    # Bind address/port is controlled by the `OLLAMA_HOST` env var above.
+    command: ["serve"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - buddy-net
+    # Note: GPU passthrough with the NVIDIA driver is not supported on macOS
+    # (and can cause errors like "could not select device driver \"nvidia\"").
+    # If you need GPU support, run this compose file on a Linux host with
+    # the NVIDIA Container Toolkit installed, or add a Linux-only override
+    # (e.g. `docker-compose.gpu.yml`) that defines device reservations.
+
+  continue-dev:  # VS Code integration proxy (optional, for remote access)
+    image: vscode/server:latest  # Or your preferred VS Code server
+    container_name: buddy-continue
+    volumes:
+      - ./continue-config:/home/vscode/.continue  # Mount your config.json here
+    ports:
+      - 127.0.0.1:8080:8080  # Access VS Code web (localhost only)
+    environment:
+      - VSCODE_CLI=1
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - buddy-net
+
+  suricata:  # IDS for network threat detection (Iron Dome "radar")
+    image: jasonish/suricata:latest
+    container_name: buddy-suricata
+    volumes:
+      - ./suricata-rules:/etc/suricata/rules  # Custom rules
+      - ./suricata-logs:/var/log/suricata
+    cap_add:
+      - NET_ADMIN
+    network_mode: host  # Monitor host network
+    command: -i eth0  # Replace with your interface (e.g., wlan0 for WiFi)
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  fail2ban:  # Auto-ban intruders (Iron Dome "interceptor")
+    image: crazymax/fail2ban:latest
+    container_name: buddy-fail2ban
+    volumes:
+      - ./fail2ban-config:/data
+      - /var/log:/var/log:ro  # Monitor system logs
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    environment:
+      - F2B_LOG_TARGET=STDOUT
+      - F2B_DB_PURGE_AGE=1d
+    restart: unless-stopped
+
+  zabbix:  # Monitoring and alerting (Iron Dome "command center")
+    image: zabbix/zabbix-server:ubuntu-6.4-latest
+    container_name: buddy-zabbix
+    volumes:
+      - ./zabbix-data:/var/lib/zabbix
+    ports:
+      - 127.0.0.1:10051:10051  # Zabbix trapper (localhost only)
+      - 127.0.0.1:80:8080  # Web UI (localhost only)
+    environment:
+      - DB_SERVER_HOST=zabbix-db  # Add a DB if needed (see below)
+      - ZBX_SERVER_NAME=BuddyIronDome
+    depends_on:
+      - zabbix-db
+    restart: unless-stopped
+    networks:
+      - buddy-net
+
+  zabbix-db:  # DB for Zabbix
+    image: postgres:16
+    container_name: buddy-zabbix-db
+    volumes:
+      - ./zabbix-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=zabbix
+      - POSTGRES_DB=zabbix
+    restart: unless-stopped
+    networks:
+      - buddy-net
+
+networks:
+  buddy-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16  # Isolated subnet
+
+volumes:
+  ollama-models:
+  data:
+  logs:
+  suricata-rules:
+  suricata-logs:
+  fail2ban-config:
+  zabbix-data:
+  zabbix-db-data:
+  continue-config:

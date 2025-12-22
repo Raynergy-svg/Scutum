@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.irondome.buddy</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-dimsu</string>
+    <string>/bin/zsh</string>
+    <string>/Users/mirelacertan/.continue/scripts/irondome-daemon.zsh</string>
+    <string>60</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>OLLAMA_URL</key>
+    <string>http://localhost:11434</string>
+    <key>OLLAMA_MODEL</key>
+    <string>llama3.2:8b-instruct-qat</string>
+    <key>IRONDOME_MODE</key>
+    <string>notify</string>
+    <key>IRONDOME_NOTIFY</key>
+    <string>1</string>
+    <key>IRONDOME_ACTIONS_ALLOWLIST</key>
+    <string>notify_only</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/irondome/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/irondome/launchd.err.log</string>
+</dict>
+</plist>
