@@ -10,8 +10,8 @@
     <string>/usr/bin/caffeinate</string>
     <string>-dimsu</string>
     <string>/bin/zsh</string>
-    <string>/Users/mirelacertan/.continue/scripts/irondome-daemon.zsh</string>
-    <string>60</string>
+    <string>-lc</string>
+    <string>exec "/Users/davidcertan/Documents/Scutum/scripts/irondome-daemon.zsh" 60</string>
   </array>
 
   <key>EnvironmentVariables</key>

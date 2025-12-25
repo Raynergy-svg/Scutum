@@ -11,7 +11,8 @@
     <string>/usr/bin/caffeinate</string>
     <string>-dimsu</string>
     <string>/bin/zsh</string>
-    <string>/Users/mirelacertan/.continue/scripts/irondome-sentinel-launch.zsh</string>
+    <string>-lc</string>
+    <string>exec "/Users/davidcertan/Documents/Scutum/scripts/irondome-sentinel-launch.zsh"</string>
   </array>
 
   <key>EnvironmentVariables</key>
